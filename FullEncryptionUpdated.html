@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Combined Encryption and Decryption</title>
+</head>
+<body>
+
+
+  <label for="encryptionType">Select Encryption Type:</label>
+  <select id="encryptionType" onchange="showEncryptionFunction()">
+    <option value="xor">XOR Encryption</option>
+    <option value="vigenere">Vigenere Encryption</option>
+    <option value="aes">AES Encryption</option>
+    <option value="des">Triple DES Encryption</option>
+    
+    <option value="rsa">RSA Encryption</option>
+    <option value="dsa">DSA Encryption</option>
+  </select>
+
+
+  <div id="encryptionFunction">
+    <!-- Placeholder for encryption function -->
+  </div>
+
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/js-sha256/0.9.0/sha256.min.js"></script>
+
+  <script>
+    function showEncryptionFunction() {
+      const encryptionType = document.getElementById('encryptionType').value;
+      const encryptionFunction = document.getElementById('encryptionFunction');
+
+
+      switch (encryptionType) {
+        case 'xor':
+          encryptionFunction.innerHTML = `
+            <h2>XOR Encryption</h2>
+            <label for="xorPlaintext">Enter Plaintext :</label>
+            <input type="text" id="xorPlaintext">
+
+
+            <label for="xorKey">Enter Key:</label>
+            <input type="text" id="xorKey">
+
+
+            <button onclick="xorEncrypt()">Encrypt</button>
+            <div id="xorEncryptOutput" class="result"></div>
+            <div id="xorEncryptError" class="error"></div>
+
+
+            <hr>
+
+
+            <h2>XOR Decryption</h2>
+            <label for="xorCiphertext">Enter Ciphertext</label>
+            <input type="text" id="xorCiphertext">
+
+
+            <label for="xorDecryptKey">Enter Key :</label>
+            <input type="text" id="xorDecryptKey" >
+
+
+            <button onclick="xorDecrypt()">Decrypt</button>
+            <div id="xorDecryptOutput" class="result"></div>
+            <div id="xorDecryptError" class="error"></div>
+          `;
+          break;
+        case 'vigenere':
+          encryptionFunction.innerHTML = `
+            <h2>Vigenere Encryption</h2>
+            <label for="vigPlaintext">Enter Plaintext: </label>
+            <input type="text" id="vigPlaintext">
+
+
+            <label for="vigKey">Enter Key: </label>
+            <input type="text" id="vigKey">
+
+
+            <button onclick="vigEncrypt()">Encrypt</button>
+            <div id="vigEncryptOutput" class="result"></div>
+            <div id="timeEncrypt" class="result"></div>
+
+
+            <hr>
+
+
+            <h2>Vigenere Decryption</h2>
+            <label for="vigCiphertext">Enter Ciphertext: </label>
+            <input type="text" id="vigCiphertext">
+
+
+            <label for="vigDecryptKey">Enter Key: </label>
+            <input type="text" id="vigDecryptKey">
+
+
+            <button onclick="vigDecrypt()">Decrypt</button>
+            <div id="vigDecryptOutput" class="result"></div>
+            <div id="timeDecrypt" class="result"></div>
+
+          `;
+          break;
+        case 'aes':
+          encryptionFunction.innerHTML = `
+            <h2>AES Encryption</h2>
+            <label for="aesPlaintext">Enter Plaintext :</label>
+            <input type="text" id="aesPlaintext">
+
+
+            <label for="aesKey">Enter Key:</label>
+            <input type="text" id="aesKey">
+
+
+            <button onclick="aesEncrypt()">Encrypt</button>
+            <div id="aesEncryptOutput" class="result"></div>
+
+
+            <hr>
+
+
+            <h2>AES Decryption</h2>
+            <label for="aesCiphertext">Enter Ciphertext</label>
+            <input type="text" id="aesCiphertext">
+
+
+            <label for="aesDecryptKey">Enter Key :</label>
+            <input type="text" id="aesDecryptKey">
+
+
+            <button onclick="aesDecrypt()">Decrypt</button>
+            <div id="aesDecryptOutput" class="result"></div>
+          `;
+          break;
+        case 'des':
+          encryptionFunction.innerHTML = `
+            <h2>Triple DES Encryption</h2>
+            <label for="desPlaintext">Enter Plaintext :</label>
+            <input type="text" id="desPlaintext">
+
+
+            <label for="desKey">Enter Key:</label>
+            <input type="text" id="desKey">
+
+
+            <button onclick="desEncrypt()">Encrypt</button>
+            <div id="desEncryptOutput" class="result"></div>
+
+
+            <hr>
+
+
+            <h2>Triple DES Decryption</h2>
+            <label for="desCiphertext">Enter Ciphertext</label>
+            <input type="text" id="desCiphertext">
+
+
+            <label for="desDecryptKey">Enter Key :</label>
+            <input type="text" id="desDecryptKey">
+
+
+            <button onclick="desDecrypt()">Decrypt</button>
+            <div id="desDecryptOutput" class="result"></div>
+          `;
+          break;
+
+          case 'rsa':
+          encryptionFunction.innerHTML = `
+            <h2>RSA Encryption Setup</h2>
+            <p>Enter two prime numbers for p & q</p>
+            <label for="rsaP">Enter p:</label>
+            <input type="text" id="rsaP" placeholder="Enter prime number ">
+            <div id="errorP" class="error"></div>
+
+            <label for="rsaQ">Enter q:</label>
+            <input type="text" id="rsaQ" placeholder="Enter prime number ">
+            <div id="errorQ" class="error"></div>
+
+            <button onclick="computeNandR()">Compute n & Φ(n)</button>
+            <p><strong>n=(p*q):</strong> <span id="rsaN"></span></p>
+            <p><strong>Φ(n)=((p-1)*(q-1)):</strong> <span id="rsar"></span></p>
+
+            <hr>
+
+            <h2>RSA Key Generation</h2>
+            <p>Enter e such that e is relatively prime to Φ(n) and less than Φ(n)</p>
+            <p>d = d*e mod(Φ(N) = 1</p>
+            <label for="rsaE">Enter e:</label>
+            <input type="text" id="rsaE" placeholder="Enter e ">
+            <div id="errorE" class="error"></div>
+
+            <label for="rsaD">Result d:</label>
+            <input type="text" id="rsaD">
+            <div id="errorD" class="error"></div>
+
+            <button onclick="validateKeys()">Calculate Keys</button>
+         
+            <p><strong>Public Key:</strong> <span id="rsaPublicKey"></span></p>
+            <p><strong>Private Key:</strong> <span id="rsaPrivateKey"></span></p>
+
+            <hr>
+
+            <h2>RSA Encryption and Decryption</h2>
+
+            <p>Enter plaintext m where m is less than n </p>
+            <p>Ciphertext c=m^e mod n</p>
+          
+
+            <label for="rsaPlaintext">Enter Plaintext m:</label>
+            <input type="text" id="rsaPlaintext" placeholder="Enter numeric plaintext">
+            <div id="errorPlaintext" class="error"></div>
+
+            <button onclick="encryptMessage()">Encrypt</button>
+            <p><strong>Ciphertext:</strong> <span id="rsaEncrypted"></span></p>
+
+            <button onclick="decryptMessage()">Decrypt</button>
+            <p><strong>Decrypted Text:</strong> <span id="rsaDecrypted"></span></p>
+            <div id="errorDecrypt" class="error"></div>
+          `;
+          break;
+          case 'dsa':
+          encryptionFunction.innerHTML = `
+            <h2>DSA Encryption</h2>
+            <label for="dsaPlaintext">Enter Plaintext :</label>
+            <input type="text" id="dsaPlaintext">
+
+            <label for="dsaP">Enter P:</label>
+            <input type="text" id="dsaP">
+
+            <label for="dsaQ">Enter Q:</label>
+            <input type="text" id="dsaQ">
+
+            <label for="dsaG">Enter G:</label>
+            <input type="text" id="dsaG">
+
+            <label for="dsaPrivateKey">Enter Private Key :</label>
+            <input type="text" id="dsaPrivateKey">
+
+            <button onclick="dsaSign()">Sign</button>
+            <div id="dsaSignOutput" class="result"></div>
+
+            <hr>
+
+            <h2>DSA Verification</h2>
+            <label for="dsaSignature">Enter Signature:</label>
+            <input type="text" id="dsaSignature">
+
+            <label for="dsaPublicKey">Enter Public Key :</label>
+            <input type="text" id="dsaPublicKey">
+
+            <button onclick="dsaVerify()">Verify</button>
+            <div id="dsaVerifyOutput" class="result"></div>
+          `;
+          break;
+
+
+
+
+        default:
+          encryptionFunction.innerHTML = '';
+      }
+    }
+
+
+        // XOR Encryption and Decryption
+
+      // Converts a string to binary 
+
+    function stringToBinary(input) {
+        let binary = '';
+        for (let i = 0; i < input.length; i++) {
+            const bin = input[i].charCodeAt(0).toString(2); // Gets binary code of each character
+            binary += bin.padStart(8, '0'); // Pad binary strings to ensure they are 8 bits long
+        }
+        return binary;
+    }
+
+    // XOR the plaintext and keytwo binary strings
+    
+    function xorBinaryStrings(binary1, binary2) {
+    let result = '';
+    for (let i = 0; i < binary1.length; i++) {
+        // XOR the bits from each string
+        const bit1 = binary1[i]; 
+        const bit2 = binary2[i]; 
+        result += (bit1 === bit2 ? '0' : '1'); // Append result of XOR
+    }
+    return result;
+}
+    
+
+    // converts binary string back to an ASCII string for ciphertext
+    function binaryToString(binary) {
+        let text = '';
+        for (let i = 0; i < binary.length; i += 8) {
+            let byte = parseInt(binary.slice(i, i + 8), 2); // Convert each 8-bit part to decimal
+            if (byte < 32 || byte > 126) { // Check if byte is outside printable ASCII range
+                byte = 32 + (byte % 95); // Map to printable range 32-126 if outside
+            }
+            text += String.fromCharCode(byte); // convert ASCII code to character and append to text
+        }
+        return text;
+    }
+
+
+    // gets user input for plaintext and key, validates it, performs encryption, and displays the result
+    function xorEncrypt() {
+        const plaintext = document.getElementById('xorPlaintext').value;
+        const key = document.getElementById('xorKey').value;
+
+        if (!plaintext || !key) {
+            document.getElementById('xorEncryptError').innerText = 'Both plaintext and key are needed.';
+            return;
+        }
+
+        const binaryPlaintext = stringToBinary(plaintext);
+        const binaryKey = stringToBinary(key);
+        const binaryCiphertext = xorBinaryStrings(binaryPlaintext, binaryKey);
+        const ciphertext = binaryToString(binaryCiphertext);
+
+        document.getElementById('xorEncryptOutput').innerText = `Ciphertext:${ciphertext}`;
+        document.getElementById('xorEncryptError').innerText = '';
+    }
+
+    //Use the ciphertext and key to get the plaintext
+    function xorDecrypt() {
+        const ciphertext = document.getElementById('xorCiphertext').value;
+        const key = document.getElementById('xorDecryptKey').value;
+
+        if (!ciphertext || !key) {
+            document.getElementById('xorDecryptError').innerText = 'Both ciphertext and key are needed.';
+            return;
+        }
+
+        const binaryCiphertext = stringToBinary(ciphertext);
+        const binaryKey = stringToBinary(key);
+        const binaryPlaintext = xorBinaryStrings(binaryCiphertext, binaryKey);
+        const plaintext = binaryToString(binaryPlaintext);
+
+        document.getElementById('xorDecryptOutput').innerText = `Plaintext: ${plaintext}`;
+        document.getElementById('xorDecryptError').innerText = '';
+    }
+
+    // global variables
+    var vigStart = Date.now();
+    var vigTimeTaken = Date.now();
+
+    // Vigenere Encryption and Decryption
+    function vigEncrypt() {
+      var plaintext = document.getElementById('vigPlaintext').value.trim();
+      var key = document.getElementById('vigKey').value.trim();
+      update('vigEncryptOutput', vigenere(plaintext, key, 1), 'Ciphertext: ');
+    }
+
+
+    function vigDecrypt() {
+      var ciphertext = document.getElementById('vigCiphertext').value.trim();
+      var key = document.getElementById('vigDecryptKey').value.trim();
+      update('vigDecryptOutput', vigenere(ciphertext, key, -1), 'Plaintext: ');
+    }
+
+
+    function vigenere(txt, key, operation) {
+        vigStart = Date.now();
+
+        //convert text to uppercase for easier math
+        txt = txt.toUpperCase();
+        key = key.toUpperCase();
+      
+        //input
+        var inp = 0, counter = 0;
+        var resu = '', ch = '';
+        var keyvalues = [];
+
+      //create an array that stores the numeric value of each letter in the key
+      //Need to subtract 65 because the uppercase alphabet starts at 65 in ASCII
+      //We want to use 0-25
+      for (let i = 0; i < key.length; i++) {
+        keyvalues[i] = key.charCodeAt(i) - 65;
+      }
+
+      //for each character in the text
+      for (let i = 0; i < txt.length; i++) {
+        ch = txt[i];
+        //make sure it is an uppurcase letter
+        if (/[A-Z]/.test(ch)) {
+          //inp = the ASCII value of the current letter in the text
+          let inp = txt.charCodeAt(i);
+          //if encryption, add the ascii value of the key to the input
+          //modulus is used to repeat the key if it is shorter than the text
+          if (operation === 1) inp += keyvalues[counter % key.length];
+          //if decryption, subtract the ascii value of the key to the input
+          else if (operation === -1) inp -= keyvalues[counter % key.length];
+          //keeps the inp value within the ASCII values of A-Z
+          while (inp > 90) inp -= 26;
+          while (inp < 65) inp += 26;
+          //converts inp to a letter
+          ch = String.fromCharCode(inp);
+          counter++;
+        }
+        //adds the current letter to result
+        resu += ch;
+      }
+
+      vigTimeTaken = Date.now() - vigStart; 
+      if (operation===1) update('timeEncrypt', vigTimeTaken, 'Time to complete in ms: ');
+      else if (operation===-1) update('timeDecrypt', vigTimeTaken, 'Time to complete in ms: ');
+
+      return resu;
+    }
+
+
+    // AES Encryption and Decryption
+    function aesEncrypt() {
+      const plaintext = document.getElementById('aesPlaintext').value.trim();
+      const key = document.getElementById('aesKey').value.trim();
+      const encrypted = CryptoJS.AES.encrypt(plaintext, key).toString();
+      document.getElementById('aesEncryptOutput').innerText = encrypted;
+    }
+
+
+    function aesDecrypt() {
+      const ciphertext = document.getElementById('aesCiphertext').value.trim();
+      const key = document.getElementById('aesDecryptKey').value.trim();
+      const decrypted = CryptoJS.AES.decrypt(ciphertext, key).toString(CryptoJS.enc.Utf8);
+      document.getElementById('aesDecryptOutput').innerText = decrypted;
+    }
+
+
+    // Triple DES Encryption and Decryption
+    function desEncrypt() {
+      const plaintext = document.getElementById('desPlaintext').value.trim();
+      const key = document.getElementById('desKey').value.trim();
+      const encrypted = CryptoJS.TripleDES.encrypt(plaintext, key).toString();
+      document.getElementById('desEncryptOutput').innerText = encrypted;
+    }
+
+
+    function desDecrypt() {
+      const ciphertext = document.getElementById('desCiphertext').value.trim();
+      const key = document.getElementById('desDecryptKey').value.trim();
+      const decrypted = CryptoJS.TripleDES.decrypt(ciphertext, key).toString(CryptoJS.enc.Utf8);
+      document.getElementById('desDecryptOutput').innerText = decrypted;
+    }
+
+
+    function update(id, input, type) {
+      document.getElementById(id).innerHTML = `<strong>${type}</strong> ${input}`;
+    }
+
+
+    function isValidInput(text) {
+      const regex = /^[01]+$/;
+      return regex.test(text);
+    }
+
+
+    
+    // RSA Encryption and Decrytion
+     
+          // Check if number is prime
+    function isPrime(num) {
+        if (num <= 1) return false; // Return false if number is 1 or less, not prime
+        if (num <= 3) return true; // Return true if number is 2 or 3, both are prime
+        if (num % 2 === 0 || num % 3 === 0) return false; // Eliminate even numbers and multiples of 3
+        for (let i = 5; i * i <= num; i += 6) {
+            // Check from 5 upwards, skipping even numbers and multiples of 3
+            if (num % i === 0 || num % (i + 2) === 0) return false; // If divisible, not prime
+        }
+        return true; // Return true if no divisors found, number is prime
+    }
+
+    // Compute the GCD
+    function gcd(a, b) {
+        while (b !== 0) {
+            let t = b; 
+            b = a % b; 
+            a = t; 
+        }
+        return a; // a is the gcd
+    }
+
+    // Compute N and r from primes p and q
+    function computeNandR() {
+        const p = parseInt(document.getElementById('rsaP').value); // Get value of p from input field and convert to integer
+        const q = parseInt(document.getElementById('rsaQ').value); // Get value of q from input field and convert to integer
+        if (!isPrime(p) || !isPrime(q)) { // Check if either p or q is not prime
+            document.getElementById('errorP').innerText = !isPrime(p) ? "p is not a prime." : ""; // error message if p is not prime
+            document.getElementById('errorQ').innerText = !isPrime(q) ? "q is not a prime." : ""; // error message if q is not prime
+            return;
+        }
+
+        const N = p * q; // Calculate n
+        const r = (p - 1) * (q - 1); // Calculate Φ(n)
+        document.getElementById('rsaN').innerText = N; // Display n
+        document.getElementById('rsar').innerText = r; // Display Φn
+        document.getElementById('errorP').innerText = ""; // Clear any previous error message for p
+        document.getElementById('errorQ').innerText = ""; // Clear any previous error message for q
+    }
+
+    // Validate RSA keys e and d
+    function validateKeys() {
+        const e = parseInt(document.getElementById('rsaE').value); // Get value of e from input field and convert to integer
+        const r = parseInt(document.getElementById('rsar').innerText); // Get Φn from displayed text
+        if (e <= 1 || e >= r || gcd(r, e) !== 1) { // Validate e must be greater than 1, less than r, and coprime to Φn
+            document.getElementById('errorE').innerText = "Invalid e. Must be 1 < e < Φ(n) and coprime to Φ(n).";
+            return;
+        }
+
+        const d = modInverse(e, r); // Calculate d using the Extended Euclidean Algorithm
+        document.getElementById('rsaD').value = d; // Display calculated value of d in the input field
+        document.getElementById('rsaPublicKey').innerText = `Public Key = (${e}, ${document.getElementById('rsaN').innerText})`;
+        document.getElementById('rsaPrivateKey').innerText = `Private Key = (${d}, ${document.getElementById('rsaN').innerText})`;
+        document.getElementById('errorE').innerText = ""; // Clear any error message for e
+    }
+
+    // Extended Euclidean Algorithm to find modular inverse
+    function modInverse(e, phi) {
+        let m0 = phi, t, q;
+        let x0 = 0, x1 = 1;
+
+        if (phi === 1) return 0; // If phi is 1, no modular inverse exists
+
+        while (e > 1) { // While e is greater than 1
+            q = Math.floor(e / phi); // q is quotient of e divided by phi
+            t = phi; // Temporary store phi
+            phi = e % phi; // phi is remainder of e divided by phi (new phi for next iteration)
+            e = t; // old phi becomes new e for next iteration
+            t = x0; // store old x0
+            x0 = x1 - q * x0; // calculate new x0
+            x1 = t; // old x0 becomes new x1
+        }
+
+        return x1 < 0 ? x1 + m0 : x1; // Ensure x1 is positive
+    }
+
+    // Power mod function for encryption and decryption
+    function powerMod(base, exponent, modulus) {
+        let result = 1;
+        base = base % modulus; // Modulus base to keep numbers small
+        while (exponent > 0) {
+            if (exponent % 2 === 1) // If exponent is odd, multiply base with result
+                result = (result * base) % modulus;
+            exponent >>= 1; // Divide exponent by 2
+            base = (base * base) % modulus; // Square base and modulus
+        }
+        return result;
+    }
+
+    // Encrypt a plaintext message
+    function encryptMessage() {
+        const plaintext = parseInt(document.getElementById('rsaPlaintext').value);
+        const e = parseInt(document.getElementById('rsaE').value);
+        const N = parseInt(document.getElementById('rsaN').innerText);
+        if (isNaN(plaintext)) {
+            document.getElementById('errorPlaintext').innerText = "Invalid plaintext.";
+            return;
+        }
+        const encrypted = powerMod(plaintext, e, N);
+        document.getElementById('rsaEncrypted').innerText = encrypted;
+        document.getElementById('errorPlaintext').innerText = "";
+    }
+
+    // Decrypt an encrypted message
+    function decryptMessage() {
+        const encrypted = parseInt(document.getElementById('rsaEncrypted').innerText);
+        const d = parseInt(document.getElementById('rsaD').value);
+        const N = parseInt(document.getElementById('rsaN').innerText);
+        if (isNaN(encrypted)) {
+            document.getElementById('errorDecrypt').innerText = "Invalid encrypted text.";
+            return;
+        }
+        const decrypted = powerMod(encrypted, d, N);
+        document.getElementById('rsaDecrypted').innerText = decrypted;
+        document.getElementById('errorDecrypt').innerText = "";
+    }
+    
+    //dsa
+    // Generate a random private key (x)
+    function generatePrivateKey() {
+        return BigInt('7'); // A random private key (chosen for example)
+    }
+
+    // Compute the public key (y)
+    function computePublicKey(x, p, g) {
+        return modPow(g, x, p);
+    }
+
+    // Sign a message
+    function sign(message, privateKey, p, q, g) {
+        let k;
+        let r;
+        let s;
+        do {
+            k = BigInt('3'); // A random k (chosen for example)
+            r = modPow(g, k, p) % q;
+            s = modInv(k, q) * ((hash(message) + privateKey * r) % q) % q;
+        } while (r === 0n || s === 0n);
+        return { r, s };
+    }
+
+    // Verify a signature
+    function verify(message, signature, publicKey, p, q, g) {
+        const { r, s } = signature;
+        if (r <= 0n || r >= q || s <= 0n || s >= q) return false;
+        const w = modInv(s, q);
+        const u1 = (hash(message) * w) % q;
+        const u2 = (r * w) % q;
+        const v = (modPow(g, u1, p) * modPow(publicKey, u2, p) % p) % q;
+        return v === r;
+    }
+
+    // Utility function: Modular exponentiation (base^exponent mod modulus)
+    function modPow(base, exponent, modulus) {
+        let result = 1n;
+        base = base % modulus;
+        while (exponent > 0n) {
+            if (exponent % 2n === 1n) {
+                result = (result * base) % modulus;
+            }
+            exponent = exponent >> 1n;
+            base = (base * base) % modulus;
+        }
+        return result;
+    }
+
+    // Utility function: Modular inverse (num^-1 mod mod)
+    function modInv(num, mod) {
+        return modPow(num, mod - 2n, mod);
+    }
+
+    // Utility function: Hash function (SHA-256)
+    function hash(message) {
+    return BigInt('0x' + sha256(message));
+    }
+
+    // Parameters (small prime numbers)
+    const g = BigInt('2');
+
+    function dsaSign() {
+      const plaintext = document.getElementById('dsaPlaintext').value;
+      const p = BigInt(document.getElementById('dsaP').value);
+      const q = BigInt(document.getElementById('dsaQ').value);
+      const g = BigInt(document.getElementById('dsaG').value);
+      const privateKey = BigInt(document.getElementById('dsaPrivateKey').value);
+
+      const signature = sign(plaintext, privateKey, p, q, g);
+      document.getElementById('dsaSignOutput').innerText = `Signature (r, s): (${signature.r}, ${signature.s})`;
+    }
+
+    function dsaVerify() {
+      const signatureInput = document.getElementById('dsaSignature').value.split(',');
+      const signature = { 
+        r: BigInt(signatureInput[0].trim()), 
+        s: BigInt(signatureInput[1].trim()) 
+      };
+      const publicKey = BigInt(document.getElementById('dsaPublicKey').value.trim());
+      const p = BigInt(document.getElementById('dsaP').value.trim());
+      const q = BigInt(document.getElementById('dsaQ').value.trim());
+      const g = BigInt(document.getElementById('dsaG').value.trim());
+      const plaintext = document.getElementById('dsaPlaintext').value;
+
+      const isValid = verify(plaintext, signature, publicKey, p, q, g);
+      document.getElementById('dsaVerifyOutput').innerText = `Is signature valid? ${isValid}`;
+    }
+
+
+  </script>
+
+
+</body>
+</html>
+
+
+
